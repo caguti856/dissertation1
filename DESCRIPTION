@@ -1,0 +1,24 @@
+Package: dissertation1
+Title: demerchart using fuzzy cmeans
+Version: 0.0.0.9000
+Authors@R: person("given" ="Catherine", "family"="Aguti",role=c("aut","cre"),
+            email="caguti856@gmail.com")
+Description: This uses fuzzzy cmeans clustering to compute control limits.
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Imports: 
+    cluster,
+    dplyr,
+    factoextra,
+    fclust,
+    ggplot2,
+    inaparc,
+    ppclust,
+    psych,
+    qcc,
+    rlang
+Depends: 
+    R (>= 2.10)
+LazyData: true

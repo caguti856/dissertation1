@@ -1,0 +1,112 @@
+#' Demerit control chart using fuzzy cmeans
+#' demrchart function
+#'
+#' @param x  dataset used
+#' @param fcm.res returns the fuzzy clustering process
+#' @param df membership value sum per class
+#' @param z mean of demerit control chart
+#' @param b1 membership value with number of defects for class A
+#' @param b2 membership value with number of defects for class B
+#' @param b3 membership value with number of defects for class C
+#' @param b4 membership value with number of defects for class D
+#' @param q  standard deviation for the demerit control chart
+#' @param dn summation of membership value per column
+#' @param CL center line
+#' @param UCL  upper control limit
+#' @param LCL lower control limit
+#' @param n  total number of sample size
+#' @param averagenumber_demerits average
+#' @param control_chart contro chart
+#'
+#' @return limits
+#' @export
+#'
+#' @examples demerchart(orangejuice,fcm.res,n=2700)
+
+demerchart<-function(x, fcm.res,df,z,b1,b2,b3,b4,q,dn,CL,UCL,LCL,n,
+                     averagenumber_demerits,control_chart){
+
+  #load dataset
+  if(missing(n)){
+    n<-as.numeric(n)
+    cat("default n is numeric \n")
+  }
+  if(missing(x))
+    stop("data not specified")
+  if(!require("ppclust")){
+    install.packages("ppclust")
+    library("ppclust")
+  }
+  #load dataset
+  #Initialize the prototype matrix
+  v<-inaparc::kmpp(x,k=4)$v
+  #Initialize membership degrees m
+  u<-inaparc::imembrand(nrow(x),k=4)$u
+  #Run FCM with the initial prototypes
+  fcm.res<-fcm(x,centers=v,memberships=u,m=2)
+  head(fcm.res$u)
+  # as.data.frame(res.fcm$u)
+  #calculating membership value sum per class
+  df<-as.data.frame(fcm.res$u)
+  #final cluster prototypesdf
+  fcm.res$v
+  summary(fcm.res)
+  #finding out details of each item available in summary(fcm.res)
+  kl<- summary(fcm.res)
+  #Extracting out the final cluster with it's number of defects per class
+  kk<-kl$v
+  print(kk)
+  #extracting number of defects per class
+  A<-subset(kk,select = "D")
+  #calculating the summation of membership value per column
+  dn<-colSums(df,na.rm = TRUE)
+
+  #summation of membership weight per class
+  if(missing(dn)){
+    cat("summation of membership value per column is invaline/n")
+  }
+  else
+  {
+    b1<-(A[1]/n)*dn[1]
+    b2<-(A[2]/n)*dn[2]
+    b3<-(A[3]/n)*dn[3]
+    b4<-(A[4]/n)*dn[4]
+  }
+  #calculating mean z
+  z<-((100*b1)+(50*b2)+(10*b3)+(1*b4))/n
+
+  #calculating standard deviation
+  q<-sqrt(((100^2*b1)+(50^2*b2)+(10^2*b3)+
+             (1^2*b4)/n))
+  #Center line
+  CL<-z
+  print(CL)
+  if(missing(LCL)||LCL<0)
+  {
+    LCL<-0
+    cat("Default LCL=0 \n")}
+  #Lower control limit
+  LCL<-CL-3*q
+  print(LCL)
+  #Upper control limit
+  UCL<-CL+3*q
+  print(UCL)
+  #Displaying the outpu
+  #Average
+  average=rowMeans(x)
+  averagenumber_demerits<-average
+  averagenumber_demerits
+  #plotting the control chart
+  control_chart<- { plot(averagenumber_demerits,xlab="sample",
+                         type="b",ylim =c(0,90),pch=19,col=4)
+    abline(h=LCL,col="coral2",lwd=2)
+    text(LCL,"LCL")
+    abline(h=CL,col="blue",lwd=2)
+    text(CL,"CL")
+    abline(h=UCL,col="coral2",lwd=2)
+    text(UCL,"UCL")
+  }
+  control_chart
+}
+
+
